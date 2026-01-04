@@ -20,7 +20,33 @@ export const useVoiceInput = (currentLang, onResult) => {
         onResultRef.current = onResult;
     }, [onResult]);
 
-    // Initialize recognition only when language changes
+    const [voiceError, setVoiceError] = useState(null);
+
+    const startListening = useCallback(() => {
+        setVoiceError(null);
+        if (recognitionRef.current && !isListening) {
+            try {
+                setIsListening(true); // Optimistic update
+                recognitionRef.current.start();
+            } catch (e) {
+                console.error("Start failed", e);
+                setIsListening(false);
+            }
+        }
+    }, [isListening]);
+
+    const stopListening = useCallback(() => {
+        if (recognitionRef.current && isListening) {
+            recognitionRef.current.stop();
+            // setIsListening(false); // Let onend handle this to be safe, or do optimistic input?
+            // "onend" will eventually fire, but for UI responsiveness on 'stop' click, 
+            // the user might expect immediate feedback, but 'stop' is usually fast.
+            // Let's rely on onend for 'false' state to ensure the engine is actually done,
+            // but for 'start' we needed it fast to show 'red'.
+        }
+    }, [isListening]);
+
+    // Initialize recognition
     useEffect(() => {
         if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
             console.warn("Speech recognition not supported in this browser.");
@@ -30,16 +56,38 @@ export const useVoiceInput = (currentLang, onResult) => {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const recognition = new SpeechRecognition();
         recognition.continuous = false;
-        recognition.interimResults = false;
+        recognition.interimResults = true; // Enable interim results for real-time feedback
         recognition.lang = currentLang;
 
-        recognition.onstart = () => setIsListening(true);
-        recognition.onend = () => setIsListening(false);
+        // recognition.onstart = () => setIsListening(true); // We handle this manually in startListening now to avoid delay/race
+
+        recognition.onend = () => {
+            console.log("Voice Input Ended");
+            setIsListening(false);
+        };
 
         recognition.onresult = (event) => {
-            const transcript = event.results?.[0]?.[0]?.transcript;
-            if (transcript) {
-                const processedText = mapIndianNumerals(transcript);
+            let finalTranscript = '';
+            let interimTranscript = '';
+
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                const transcript = event.results[i][0].transcript;
+                if (event.results[i].isFinal) {
+                    finalTranscript += transcript;
+                } else {
+                    interimTranscript += transcript;
+                }
+            }
+
+            if (interimTranscript) {
+                console.log("Interim Voice:", interimTranscript);
+            }
+
+            if (finalTranscript) {
+                console.log("Final Voice Result:", finalTranscript);
+                setVoiceError(null);
+
+                const processedText = mapIndianNumerals(finalTranscript);
                 if (onResultRef.current) {
                     onResultRef.current(processedText);
                 }
@@ -47,7 +95,13 @@ export const useVoiceInput = (currentLang, onResult) => {
         };
 
         recognition.onerror = (event) => {
-            console.error("Speech recognition error", event.error);
+            if (event.error === 'no-speech') {
+                console.warn("Voice input: No speech detected.");
+                setVoiceError('no-speech');
+            } else {
+                console.error("Speech recognition error", event.error);
+                setVoiceError(event.error);
+            }
             setIsListening(false);
         };
 
@@ -58,23 +112,7 @@ export const useVoiceInput = (currentLang, onResult) => {
                 recognitionRef.current.abort();
             }
         };
-    }, [currentLang]); // Dependency on currentLang ONLY
+    }, [currentLang]);
 
-    const startListening = useCallback(() => {
-        if (recognitionRef.current && !isListening) {
-            try {
-                recognitionRef.current.start();
-            } catch (e) {
-                console.error("Start failed", e);
-            }
-        }
-    }, [isListening]);
-
-    const stopListening = useCallback(() => {
-        if (recognitionRef.current && isListening) {
-            recognitionRef.current.stop();
-        }
-    }, [isListening]);
-
-    return { isListening, startListening, stopListening };
+    return { isListening, startListening, stopListening, voiceError };
 };

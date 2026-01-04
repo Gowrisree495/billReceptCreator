@@ -32,7 +32,7 @@ export const useBillLogic = () => {
     }, [activeField]);
 
     // Voice Hook
-    const { isListening, startListening, stopListening } = useVoiceInput(voiceLang, handleVoiceResult);
+    const { isListening, startListening, stopListening, voiceError } = useVoiceInput(voiceLang, handleVoiceResult);
 
     // Sync activeField with listening state
     useEffect(() => {
