@@ -4,11 +4,11 @@ import { useVoiceInput } from './useVoiceInput';
 import { formConfig } from '../formConfig';
 
 export const useBillLogic = () => {
-    const [lang, setLang] = useState('en');
-    const [voiceLang, setVoiceLang] = useState('en-IN');
+    const [lang, setLang] = useState('te');
+    const [voiceLang, setVoiceLang] = useState('te-IN');
     const [activeField, setActiveField] = useState(null);
     const [isMuted, setIsMuted] = useState(false);
-    const [theme, setTheme] = useState('dark');
+    const [theme, setTheme] = useState('light');
 
     const [data, setData] = useState({
         customerName: '',
@@ -46,8 +46,8 @@ export const useBillLogic = () => {
     // Logic Actions
     const handleLangSwitch = (code) => {
         setLang(code);
-        const l = languages.find(x => x.code === code);
-        if (l) setVoiceLang(l.voiceLang);
+        const lang = languages.find(x => x.code === code);
+        if (lang) setVoiceLang(lang.voiceLang);
     };
 
     const speakPrompt = (promptKey) => {
@@ -133,9 +133,9 @@ export const useBillLogic = () => {
         // Recalculate balance for the message to be sure
         const currentBalance = Math.max(0, (parseFloat(totalAmount) || 0) - (parseFloat(advanceAmount) || 0));
 
-        const msg = `━━━━━━━━━━━━━━━━━━━━
+        const msg = `━━━━━━━━━━━━━━
 ✨      *BILL RECEIPT* ✨
-━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━
 
 👤  *Customer:* ${customerName}
 🛍️  *Item:* ${itemName}
@@ -149,12 +149,12 @@ export const useBillLogic = () => {
 
 📅  *Delivery:* ${deliveryDate}
 
-━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━
 🙏  *Thank you for shopping!*  🙏
      Have a great day!`.trim();
 
         const encodedMsg = encodeURIComponent(msg);
-        const url = `https://api.whatsapp.com/send?phone=${mobileNumber}&text=${encodedMsg}`;
+        const url = `https://api.whatsapp.com/send?phone=+91${mobileNumber}&text=${encodedMsg}`;
         window.open(url, '_blank');
     };
 
