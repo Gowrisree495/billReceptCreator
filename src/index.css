@@ -6,4 +6,20 @@
   body {
     @apply bg-slate-950 text-white;
   }
+  
+  /* Custom Scrollbar for better visibility */
+  ::-webkit-scrollbar {
+      width: 12px;
+      background-color: #1e293b; /* Slate 800 */
+  }
+
+  ::-webkit-scrollbar-thumb {
+      background-color: #475569; /* Slate 600 */
+      border-radius: 6px;
+      border: 2px solid #1e293b;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+      background-color: #94a3b8; /* Slate 400 */
+  }
 }

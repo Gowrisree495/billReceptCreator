@@ -26,7 +26,23 @@ export const useBillLogic = () => {
     // Voice Result Handler
     const handleVoiceResult = useCallback((text) => {
         if (activeField) {
-            setData(prev => ({ ...prev, [activeField]: text }));
+            let processedText = text;
+
+            if (activeField === 'mobileNumber') {
+                // Remove all spaces for mobile number
+                processedText = text.replace(/\s+/g, '');
+            } else if (['quantity', 'totalAmount', 'advanceAmount'].includes(activeField)) {
+                // Extract number and ensure positive
+                const num = parseFloat(text);
+                if (!isNaN(num)) {
+                    processedText = Math.abs(num).toString();
+                } else {
+                    // Fallback if parsing fails, or keep raw if complex (though regex mostly handles digits)
+                    processedText = text;
+                }
+            }
+
+            setData(prev => ({ ...prev, [activeField]: processedText }));
             setActiveField(null);
         }
     }, [activeField]);

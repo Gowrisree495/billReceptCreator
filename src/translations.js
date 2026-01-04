@@ -2,7 +2,7 @@ export const translations = {
     en: {
         customerName: "Customer Name",
         mobileNumber: "Mobile Number",
-        itemName: "Item Name",
+        itemName: "Item Names",
         quantity: "Quantity",
         totalAmount: "Total Amount",
         advanceAmount: "Advance Amount",
@@ -12,7 +12,7 @@ export const translations = {
         prompts: {
             customerName: "Who is this bill for?",
             mobileNumber: "What is the mobile number?",
-            itemName: "What is the item name?",
+            itemName: "What are the item names?",
             quantity: "How much quantity?",
             totalAmount: "What is the total amount?",
             advanceAmount: "How much advance received?",
@@ -21,7 +21,7 @@ export const translations = {
     hi: {
         customerName: "साहब का नाम", // "Customer Name" in Hindi context usually "Grahak Ka Naam" or just "Naam"
         mobileNumber: "मोबाइल नंबर",
-        itemName: "सामान का नाम",
+        itemName: "सामान के नाम",
         quantity: "कितना सामान (मात्रा)",
         totalAmount: "कुल राशि",
         advanceAmount: "जमा राशि (एडवांस)",
@@ -31,7 +31,7 @@ export const translations = {
         prompts: {
             customerName: "बिल किसके नाम पर है?",
             mobileNumber: "मोबाइल नंबर क्या है?",
-            itemName: "सामान का नाम क्या है?",
+            itemName: "सामान के नाम क्या हैं?",
             quantity: "कितना सामान है?",
             totalAmount: "कुल कितने रुपये हुए?",
             advanceAmount: "कितना एडवांस मिला?",
@@ -40,7 +40,7 @@ export const translations = {
     te: {
         customerName: "కస్టమర్ పేరు",
         mobileNumber: "మొబైల్ నంబర్",
-        itemName: "వస్తువు పేరు",
+        itemName: "వస్తువుల పేర్లు",
         quantity: "పరిమాణం",
         totalAmount: "మొత్తం ధర",
         advanceAmount: "ముందస్తు చెల్లింపు",
@@ -50,7 +50,7 @@ export const translations = {
         prompts: {
             customerName: "బిల్లు ఎవరి పేరు మీద ఉంది?",
             mobileNumber: "మొబైల్ నంబర్ చెప్పండి?",
-            itemName: "వస్తువు పేరు ఏమిటి?",
+            itemName: "వస్తువుల పేర్లు ఏమిటి?",
             quantity: "ఎంత పరిమాణం?",
             totalAmount: "మొత్తం ఎంత అయింది?",
             advanceAmount: "ఎంత అడ్వాన్స్ ఇచ్చారు?",
