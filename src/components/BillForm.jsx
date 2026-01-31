@@ -1,8 +1,9 @@
 import React from 'react';
 import SmartRow from './SmartRow';
+import InstructionsRow from './InstructionsRow';
 import { formConfig } from '../formConfig';
 
-const BillForm = ({ data, t, actions, activeField, errors }) => {
+const BillForm = ({ data, t, actions, activeField, errors, isInstructionsActive, instructionsAudioUrl }) => {
     return (
         <main className="p-4 space-y-4 max-w-lg mx-auto">
 
@@ -82,6 +83,18 @@ const BillForm = ({ data, t, actions, activeField, errors }) => {
                 type="date"
                 isListening={false}
                 iconColor="text-purple-500"
+            />
+
+            <InstructionsRow
+                label={t.instructions}
+                value={data.instructions}
+                onChange={(e) => actions.handleChange('instructions', e.target.value)}
+                placeholder={t.instructionsPlaceholder}
+                onClick={() => actions.speakPrompt('instructions')}
+                onVoiceRecordClick={actions.handleInstructionsVoiceRecordClick}
+                isActive={isInstructionsActive}
+                audioUrl={instructionsAudioUrl}
+                onClearAudio={actions.clearInstructionsRecording}
             />
 
         </main>

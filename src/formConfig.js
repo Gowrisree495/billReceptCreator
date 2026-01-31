@@ -22,5 +22,6 @@ export const formConfig = {
     quantity: { required: false },
     totalAmount: { required: false },
     advanceAmount: { required: false },
-    deliveryDate: { required: false }
+    deliveryDate: { required: false },
+    instructions: { required: false }
 };

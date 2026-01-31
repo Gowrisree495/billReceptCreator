@@ -24,6 +24,8 @@ function App() {
         actions={actions}
         activeField={state.activeField}
         errors={state.errors}
+        isInstructionsActive={state.isInstructionsActive}
+        instructionsAudioUrl={state.instructionsAudioUrl}
       />
 
       <Footer

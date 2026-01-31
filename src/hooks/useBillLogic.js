@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { translations, languages } from '../translations';
 import { useVoiceInput } from './useVoiceInput';
+import { useAudioRecorder } from './useAudioRecorder';
 import { formConfig } from '../formConfig';
 
 export const useBillLogic = () => {
@@ -17,7 +18,8 @@ export const useBillLogic = () => {
         quantity: '',
         totalAmount: '',
         advanceAmount: '',
-        deliveryDate: ''
+        deliveryDate: '',
+        instructions: ''
     });
 
     const [errors, setErrors] = useState({});
@@ -49,6 +51,15 @@ export const useBillLogic = () => {
 
     // Voice Hook
     const { isListening, startListening, stopListening, voiceError } = useVoiceInput(voiceLang, handleVoiceResult);
+
+    // Audio Recorder Hook for instructions field
+    const {
+        isRecording: isInstructionsRecording,
+        audioUrl: instructionsAudioUrl,
+        startRecording: startInstructionsRecording,
+        stopRecording: stopInstructionsRecording,
+        clearRecording: clearInstructionsRecording
+    } = useAudioRecorder();
 
     // Sync activeField with listening state
     useEffect(() => {
@@ -101,6 +112,27 @@ export const useBillLogic = () => {
         }
     };
 
+    // Handle combined voice input + audio recording for instructions field
+    // Single button that does BOTH speech-to-text AND audio recording
+    const handleInstructionsVoiceRecordClick = () => {
+        const isCurrentlyActive = activeField === 'instructions' && (isListening || isInstructionsRecording);
+
+        if (isCurrentlyActive) {
+            // Stop both
+            stopListening();
+            stopInstructionsRecording();
+            setActiveField(null);
+        } else {
+            // Start both
+            setActiveField('instructions');
+            startListening();
+            startInstructionsRecording();
+        }
+    };
+
+    // Computed state for instructions field active status
+    const isInstructionsActive = activeField === 'instructions' && (isListening || isInstructionsRecording);
+
     // Validation Helper
     const validateField = (field, value) => {
         const config = formConfig[field];
@@ -145,11 +177,11 @@ export const useBillLogic = () => {
     };
 
     const handleSendWhatsApp = () => {
-        const { customerName, mobileNumber, itemName, quantity, totalAmount, advanceAmount, deliveryDate } = data;
+        const { customerName, mobileNumber, itemName, quantity, totalAmount, advanceAmount, deliveryDate, instructions } = data;
         // Recalculate balance for the message to be sure
         const currentBalance = Math.max(0, (parseFloat(totalAmount) || 0) - (parseFloat(advanceAmount) || 0));
 
-        const msg = `━━━━━━━━━━━━━━
+        let msg = `━━━━━━━━━━━━━━
 ✨      *BILL RECEIPT* ✨
 ━━━━━━━━━━━━━━
 
@@ -163,13 +195,18 @@ export const useBillLogic = () => {
 🔴  *Balance:* *₹${currentBalance}* 
 ------------------------------------
 
-📅  *Delivery:* ${deliveryDate}
+📅  *Delivery:* ${deliveryDate}`;
 
-━━━━━━━━━━━━━━
+        // Add instructions if present
+        if (instructions && instructions.trim()) {
+            msg += `\n\n📝  *Instructions:* ${instructions}`;
+        }
+
+        msg += `\n\n━━━━━━━━━━━━━━
 🙏  *Thank you for shopping!*  🙏
-     Have a great day!`.trim();
+     Have a great day!`;
 
-        const encodedMsg = encodeURIComponent(msg);
+        const encodedMsg = encodeURIComponent(msg.trim());
         const url = `https://api.whatsapp.com/send?phone=+91${mobileNumber}&text=${encodedMsg}`;
         window.open(url, '_blank');
     };
@@ -205,7 +242,10 @@ export const useBillLogic = () => {
     }, []);
 
     return {
-        state: { lang, data, activeField, isListening, balance, isMuted, theme, errors, isFormValid },
+        state: {
+            lang, data, activeField, isListening, balance, isMuted, theme, errors, isFormValid,
+            isInstructionsRecording, instructionsAudioUrl, isInstructionsActive
+        },
         actions: {
             setData,
             handleLangSwitch,
@@ -215,7 +255,9 @@ export const useBillLogic = () => {
             handleChange,
             handleSendWhatsApp,
             toggleMute,
-            toggleTheme
+            toggleTheme,
+            handleInstructionsVoiceRecordClick,
+            clearInstructionsRecording
         },
         t,
         languages
