@@ -80,7 +80,7 @@ const SmartRow = ({
                         }}
                         className={`flex-shrink-0 p-3 rounded-full transition-all ${isListening ? 'bg-red-600 animate-pulse text-white' : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 hover:bg-gray-200 dark:hover:bg-slate-700'}`}
                     >
-                        <span className="material-icons">{isListening ? 'mic' : 'mic_none'}</span>
+                        <span className="material-icons">{isListening ? 'stop_circle' : 'mic_none'}</span>
                     </button>
                 )}
             </div>

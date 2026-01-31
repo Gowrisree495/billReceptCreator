@@ -38,7 +38,7 @@ export const useVoiceInput = (currentLang, onResult) => {
     const stopListening = useCallback(() => {
         if (recognitionRef.current && isListening) {
             recognitionRef.current.stop();
-            // setIsListening(false); // Let onend handle this to be safe, or do optimistic input?
+            setIsListening(false); // Immediate UI feedback
             // "onend" will eventually fire, but for UI responsiveness on 'stop' click, 
             // the user might expect immediate feedback, but 'stop' is usually fast.
             // Let's rely on onend for 'false' state to ensure the engine is actually done,
