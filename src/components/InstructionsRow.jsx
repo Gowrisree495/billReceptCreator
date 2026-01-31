@@ -19,7 +19,9 @@ const InstructionsRow = ({
     const borderColor = isActive ? "border-red-500" : "border-transparent";
 
     const handleContainerClick = () => {
-        if (textareaRef.current) {
+        if (onClick) {
+            onClick();
+        } else if (textareaRef.current) {
             textareaRef.current.focus();
         }
     };

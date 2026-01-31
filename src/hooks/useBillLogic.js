@@ -25,8 +25,27 @@ export const useBillLogic = () => {
     const [errors, setErrors] = useState({});
     const [isFormValid, setIsFormValid] = useState(false);
 
+    // Number extraction helper to handle numeric words and digits
+    const extractNumber = (text) => {
+        if (!text) return '';
+
+        // Handle common English number words (small numbers often returned as words)
+        const wordToNum = {
+            'zero': '0', 'one': '1', 'two': '2', 'three': '3', 'four': '4',
+            'five': '5', 'six': '6', 'seven': '7', 'eight': '8', 'nine': '9', 'ten': '10'
+        };
+
+        const cleanText = text.toLowerCase().trim().replace(/[\.\,\?]/g, '');
+        if (wordToNum[cleanText]) return wordToNum[cleanText];
+
+        // Extract digits using regex
+        const match = text.match(/\d+(\.\d+)?/);
+        return match ? match[0] : text;
+    };
+
     // Voice Result Handler
     const handleVoiceResult = useCallback((text) => {
+        console.log("handleVoiceResult for field:", activeField, "with text:", text);
         if (activeField) {
             let processedText = text;
 
@@ -35,16 +54,17 @@ export const useBillLogic = () => {
                 processedText = text.replace(/\s+/g, '');
             } else if (['quantity', 'totalAmount', 'advanceAmount'].includes(activeField)) {
                 // Extract number and ensure positive
-                const num = parseFloat(text);
+                const extracted = extractNumber(text);
+                const num = parseFloat(extracted);
                 if (!isNaN(num)) {
                     processedText = Math.abs(num).toString();
                 } else {
-                    // Fallback if parsing fails, or keep raw if complex (though regex mostly handles digits)
-                    processedText = text;
+                    processedText = extracted;
                 }
             }
 
             setData(prev => ({ ...prev, [activeField]: processedText }));
+            // We clear activeField here after processing is complete
             setActiveField(null);
         }
     }, [activeField]);
@@ -61,12 +81,14 @@ export const useBillLogic = () => {
         clearRecording: clearInstructionsRecording
     } = useAudioRecorder();
 
-    // Sync activeField with listening state
+    // REMOVED: Redundant effect that was causing race condition by clearing activeField too early
+    /*
     useEffect(() => {
         if (!isListening && activeField) {
             setActiveField(null);
         }
     }, [isListening, activeField]);
+    */
 
     const t = translations[lang];
 
@@ -80,10 +102,16 @@ export const useBillLogic = () => {
     const speakPrompt = (promptKey) => {
         if (isMuted) return;
         const text = t.prompts[promptKey];
+        console.log("Speaking prompt for:", promptKey, "Text:", text);
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
+            if (!text) {
+                console.warn("No prompt text found for:", promptKey);
+                return;
+            }
             const utterance = new SpeechSynthesisUtterance(text);
             const voices = window.speechSynthesis.getVoices();
+            console.log("Available voices:", voices.length);
             const matchingVoice = voices.find(v => v.lang === voiceLang || v.lang.replace('_', '-') === voiceLang);
             if (matchingVoice) utterance.voice = matchingVoice;
             utterance.lang = voiceLang;
