@@ -3,7 +3,7 @@ import SmartRow from './SmartRow';
 import InstructionsRow from './InstructionsRow';
 import { formConfig } from '../formConfig';
 
-const BillForm = ({ data, t, actions, activeField, errors, isInstructionsActive, instructionsAudioUrl }) => {
+const BillForm = ({ data, t, actions, activeField, errors, isInstructionsActive, isCleaningInstructions, instructionsAudioUrl }) => {
     return (
         <main className="p-4 space-y-4 max-w-lg mx-auto">
 
@@ -93,6 +93,7 @@ const BillForm = ({ data, t, actions, activeField, errors, isInstructionsActive,
                 onClick={() => actions.speakPrompt('instructions')}
                 onVoiceRecordClick={actions.handleInstructionsVoiceRecordClick}
                 isActive={isInstructionsActive}
+                isCleaning={isCleaningInstructions}
                 audioUrl={instructionsAudioUrl}
                 onClearAudio={actions.clearInstructionsRecording}
             />

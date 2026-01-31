@@ -25,6 +25,7 @@ function App() {
         activeField={state.activeField}
         errors={state.errors}
         isInstructionsActive={state.isInstructionsActive}
+        isCleaningInstructions={state.isCleaningInstructions}
         instructionsAudioUrl={state.instructionsAudioUrl}
       />
 

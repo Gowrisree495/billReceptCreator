@@ -3,6 +3,7 @@ import { translations, languages } from '../translations';
 import { useVoiceInput } from './useVoiceInput';
 import { useAudioRecorder } from './useAudioRecorder';
 import { formConfig } from '../formConfig';
+import { extractInstructions } from '../utils/gemini';
 
 export const useBillLogic = () => {
     const [lang, setLang] = useState('te');
@@ -24,6 +25,7 @@ export const useBillLogic = () => {
 
     const [errors, setErrors] = useState({});
     const [isFormValid, setIsFormValid] = useState(false);
+    const [isCleaningInstructions, setIsCleaningInstructions] = useState(false);
 
     // Number extraction helper to handle numeric words and digits
     const extractNumber = (text) => {
@@ -61,13 +63,39 @@ export const useBillLogic = () => {
                 } else {
                     processedText = extracted;
                 }
+            } else if (activeField === 'instructions') {
+                // Trigger AI Extraction/Cleaning Layer
+                const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+                if (apiKey && processedText.trim().length > 10) {
+                    setIsCleaningInstructions(true);
+
+                    // We set the raw text IMMEDIATELY so the user sees something
+                    setData(prev => ({ ...prev, instructions: processedText }));
+
+                    // Then clean it in the background
+                    extractInstructions(processedText, lang, apiKey)
+                        .then(cleanedText => {
+                            if (cleanedText) {
+                                setData(prev => ({ ...prev, instructions: cleanedText }));
+                            }
+                        })
+                        .finally(() => {
+                            setIsCleaningInstructions(false);
+                        });
+
+                    // NOTE: We do NOT clear activeField here yet if we want to show cleaning status 
+                    // or we clear it and use isCleaningInstructions flag for UI.
+                    // Let's clear it to allow other fields but keep cleaning flag.
+                    setActiveField(null);
+                    return; // Exit early to avoid the default setData at the bottom
+                }
             }
 
             setData(prev => ({ ...prev, [activeField]: processedText }));
             // We clear activeField here after processing is complete
             setActiveField(null);
         }
-    }, [activeField]);
+    }, [activeField, lang]);
 
     // Voice Hook
     const { isListening, startListening, stopListening, voiceError } = useVoiceInput(voiceLang, handleVoiceResult);
@@ -272,7 +300,7 @@ export const useBillLogic = () => {
     return {
         state: {
             lang, data, activeField, isListening, balance, isMuted, theme, errors, isFormValid,
-            isInstructionsRecording, instructionsAudioUrl, isInstructionsActive
+            isInstructionsRecording, instructionsAudioUrl, isInstructionsActive, isCleaningInstructions
         },
         actions: {
             setData,

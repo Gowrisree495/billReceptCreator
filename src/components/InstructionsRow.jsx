@@ -9,6 +9,7 @@ const InstructionsRow = ({
     // Combined voice + recording props
     onVoiceRecordClick,
     isActive,  // true when either listening or recording
+    isCleaning, // true when Gemini AI is processing
     audioUrl,
     onClearAudio
 }) => {
@@ -175,8 +176,16 @@ const InstructionsRow = ({
                     </div>
                 )}
 
+                {/* AI Cleaning indicator */}
+                {isCleaning && (
+                    <div className="flex items-center gap-2 mt-2 text-blue-500 text-sm font-bold">
+                        <span className="material-icons text-lg animate-spin">sync</span>
+                        ✨ Extraction in progress - cleaning instructions...
+                    </div>
+                )}
+
                 {/* Audio saved indicator */}
-                {audioUrl && !isActive && (
+                {audioUrl && !isActive && !isCleaning && (
                     <div className="flex items-center gap-2 mt-2 text-emerald-500 text-sm font-medium">
                         <span className="material-icons text-lg">check_circle</span>
                         Audio saved - tap play to listen
